@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscripción - ETP Expo</title>
+  <meta name="description" content="Inscripción de visitantes y expositores a la ETP Expo.">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Inscripción - ETP Expo">
+  <meta property="og:description" content="Anotate como visitante o expositor. La inscripción es gratuita.">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #0d6efd;
+      --primary-dark: #0a58ca;
+      --secondary: #6c757d;
+      --success: #198754;
+      --danger: #dc3545;
+      --dark: #212529;
+      --light: #f8f9fa;
+      --white: #ffffff;
+      --border: #e9ecef;
+      --shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      line-height: 1.6;
+      color: var(--dark);
+      background: var(--light);
+    }
+
+    .cabecera {
+      background: linear-gradient(135deg, #0d6efd 0%, #0a47a1 100%);
+      color: var(--white);
+      padding: 45px 20px 40px;
+      text-align: center;
+    }
+
+    .cabecera h1 { font-size: 2.1rem; margin-bottom: 8px; }
+    .cabecera p { opacity: 0.93; max-width: 600px; margin: 0 auto; }
+
+    .hoja {
+      max-width: 700px;
+      margin: -25px auto 50px;
+      padding: 0 20px;
+    }
+
+    .tarjeta {
+      background: var(--white);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      padding: 32px 34px;
+    }
+
+    /* ----- Elegir tipo ----- */
+
+    .tipos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 26px;
+    }
+
+    .tipo {
+      background: var(--light);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      font-family: inherit;
+    }
+
+    .tipo:hover { border-color: #b9ccf5; }
+
+    .tipo.elegido {
+      border-color: var(--primary);
+      background: #e7f1ff;
+    }
+
+    .tipo i { font-size: 1.7rem; color: var(--primary); display: block; margin-bottom: 8px; }
+    .tipo strong { display: block; font-size: 1.05rem; margin-bottom: 3px; }
+    .tipo span { font-size: 0.85rem; color: var(--secondary); }
+
+    /* ----- Campos ----- */
+
+    .campo { margin-bottom: 17px; }
+
+    .fila {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+
+    label .opcional {
+      font-weight: 400;
+      color: var(--secondary);
+      font-size: 0.82rem;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      background: var(--white);
+      color: var(--dark);
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12);
+    }
+
+    input.error { border-color: var(--danger); }
+
+    .mensaje-error {
+      display: none;
+      color: var(--danger);
+      font-size: 0.82rem;
+      margin-top: 4px;
+    }
+
+    .mensaje-error.visible { display: block; }
+
+    .solo-expositor { display: none; }
+    body.expositor .solo-expositor { display: block; }
+
+    /* ----- Botón ----- */
+
+    .enviar {
+      width: 100%;
+      background: var(--primary);
+      color: var(--white);
+      border: none;
+      border-radius: 8px;
+      padding: 15px;
+      font-family: inherit;
+      font-size: 1.02rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background .15s;
+    }
+
+    .enviar:hover:not(:disabled) { background: var(--primary-dark); }
+    .enviar:disabled { opacity: .6; cursor: default; }
+
+    .aviso-datos {
+      margin-top: 16px;
+      font-size: 0.83rem;
+      color: var(--secondary);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* ----- Resultado ----- */
+
+    .resultado { display: none; text-align: center; padding: 20px 0; }
+    body.listo .resultado { display: block; }
+    body.listo .formulario { display: none; }
+
+    .resultado i {
+      font-size: 3.4rem;
+      color: var(--success);
+      margin-bottom: 16px;
+    }
+
+    .resultado h2 { font-size: 1.5rem; margin-bottom: 10px; }
+    .resultado p { color: #495057; margin-bottom: 8px; }
+
+    .codigo {
+      display: inline-block;
+      background: var(--light);
+      border: 2px dashed var(--primary);
+      border-radius: 10px;
+      padding: 16px 32px;
+      margin: 18px 0;
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--primary);
+    }
+
+    .otra-vez {
+      background: transparent;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      border-radius: 7px;
+      padding: 10px 22px;
+      font-family: inherit;
+      font-size: 0.92rem;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .falla {
+      display: none;
+      background: #fdecee;
+      border-left: 4px solid var(--danger);
+      border-radius: 0 6px 6px 0;
+      padding: 13px 16px;
+      margin-bottom: 18px;
+      font-size: 0.9rem;
+      color: #8e1c25;
+    }
+
+    .falla.visible { display: block; }
+
+    footer {
+      text-align: center;
+      padding: 22px;
+      font-size: 0.85rem;
+      color: var(--secondary);
+    }
+
+    @media (max-width: 620px) {
+      .fila, .tipos { grid-template-columns: 1fr; }
+      .tarjeta { padding: 24px 20px; }
+      .cabecera h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cabecera">
+    <h1>ETP Expo</h1>
+    <p>Inscripción de visitantes y expositores. Es gratuita y te lleva un minuto.</p>
+  </div>
+
+  <div class="hoja">
+    <div class="tarjeta">
+
+      <div class="formulario">
+        <div class="falla" id="falla"></div>
+
+        <div class="tipos">
+          <button type="button" class="tipo elegido" data-tipo="visitante">
+            <i class="fas fa-user"></i>
+            <strong>Visitante</strong>
+            <span>Vengo a recorrer la muestra</span>
+          </button>
+          <button type="button" class="tipo" data-tipo="expositor">
+            <i class="fas fa-store"></i>
+            <strong>Expositor</strong>
+            <span>Presento un proyecto o stand</span>
+          </button>
+        </div>
+
+        <div class="fila">
+          <div class="campo">
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" autocomplete="given-name" required>
+            <span class="mensaje-error" id="error-nombre">Poné tu nombre</span>
+          </div>
+          <div class="campo">
+            <label for="apellido">Apellido</label>
+            <input type="text" id="apellido" autocomplete="family-name" required>
+            <span class="mensaje-error" id="error-apellido">Poné tu apellido</span>
+          </div>
+        </div>
+
+        <div class="fila">
+          <div class="campo">
+            <label for="dni">DNI</label>
+            <input type="text" id="dni" inputmode="numeric" autocomplete="off" required>
+            <span class="mensaje-error" id="error-dni">Poné tu DNI, solo los números</span>
+          </div>
+          <div class="campo">
+            <label for="localidad">Localidad</label>
+            <input type="text" id="localidad" autocomplete="address-level2" required>
+            <span class="mensaje-error" id="error-localidad">Poné tu localidad</span>
+          </div>
+        </div>
+
+        <div class="campo">
+          <label for="institucion">Institución o escuela</label>
+          <input type="text" id="institucion" required>
+          <span class="mensaje-error" id="error-institucion">Poné el nombre de la institución</span>
+        </div>
+
+        <div class="campo">
+          <label for="cargo">Cargo o curso <span class="opcional">— opcional</span></label>
+          <input type="text" id="cargo" placeholder="Docente, 6to año, directivo...">
+        </div>
+
+        <div class="campo solo-expositor">
+          <label for="stand">Nombre del proyecto o stand</label>
+          <input type="text" id="stand">
+          <span class="mensaje-error" id="error-stand">Poné el nombre del proyecto</span>
+        </div>
+
+        <div class="fila">
+          <div class="campo">
+            <label for="correo">Correo <span class="opcional">— opcional</span></label>
+            <input type="email" id="correo" autocomplete="email">
+          </div>
+          <div class="campo">
+            <label for="telefono">Teléfono <span class="opcional">— opcional</span></label>
+            <input type="tel" id="telefono" autocomplete="tel">
+          </div>
+        </div>
+
+        <button type="button" class="enviar" id="enviar">Confirmar inscripción</button>
+
+        <p class="aviso-datos">
+          Los datos se usan únicamente para preparar tu credencial y organizar el evento.
+          No se comparten con nadie ni se usan para otra cosa.
+        </p>
+      </div>
+
+      <div class="resultado">
+        <i class="fas fa-circle-check"></i>
+        <h2 id="tituloResultado">¡Listo, quedaste inscripto!</h2>
+        <p id="textoResultado">Presentate en la entrada con este código y te damos tu credencial.</p>
+        <div class="codigo" id="codigoAsignado">—</div>
+        <p style="font-size: 0.88rem; color: #6c757d;">
+          Sacale una foto a esta pantalla. Si no, con tu DNI también te encontramos.
+        </p>
+        <button type="button" class="otra-vez" id="otraVez">Inscribir a otra persona</button>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>
+    Organiza EduTec JHF &middot; Pilar, Provincia de Buenos Aires
+  </footer>
+
+  <script>
+    // La direccion del script que guarda las inscripciones.
+    // Sale de Google Apps Script al publicarlo. Esta explicado en el instructivo.
+    const DONDE_GUARDAR = 'https://script.google.com/macros/s/AKfycbzOOQBR0B4Xw2_i5SldoU6vRzW-k-ehOFhutB5sb44pidzM57DG05Kof4BVGGnNFTci/exec';
+
+    let tipo = 'visitante';
+
+    // ----- Elegir visitante o expositor -----
+    document.querySelectorAll('.tipo').forEach(boton => {
+      boton.addEventListener('click', () => {
+        document.querySelectorAll('.tipo').forEach(b => b.classList.remove('elegido'));
+        boton.classList.add('elegido');
+        tipo = boton.dataset.tipo;
+        document.body.classList.toggle('expositor', tipo === 'expositor');
+      });
+    });
+
+    // ----- Controles antes de mandar -----
+    function valorDe(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    function marcarError(id, hay) {
+      document.getElementById(id).classList.toggle('error', hay);
+      const mensaje = document.getElementById('error-' + id);
+      if (mensaje) mensaje.classList.toggle('visible', hay);
+      return !hay;
+    }
+
+    function estaCompleto() {
+      let bien = true;
+
+      bien = marcarError('nombre', valorDe('nombre').length < 2) && bien;
+      bien = marcarError('apellido', valorDe('apellido').length < 2) && bien;
+      bien = marcarError('localidad', valorDe('localidad').length < 2) && bien;
+      bien = marcarError('institucion', valorDe('institucion').length < 2) && bien;
+
+      // El DNI: entre 7 y 9 numeros, sin puntos
+      const dni = valorDe('dni').replace(/\D/g, '');
+      bien = marcarError('dni', dni.length < 7 || dni.length > 9) && bien;
+
+      if (tipo === 'expositor') {
+        bien = marcarError('stand', valorDe('stand').length < 2) && bien;
+      }
+
+      return bien;
+    }
+
+    // ----- Mandar -----
+    const botonEnviar = document.getElementById('enviar');
+
+    botonEnviar.addEventListener('click', async () => {
+      const falla = document.getElementById('falla');
+      falla.classList.remove('visible');
+
+      if (!estaCompleto()) {
+        falla.textContent = 'Faltan algunos datos. Fijate los campos marcados en rojo.';
+        falla.classList.add('visible');
+        return;
+      }
+
+      botonEnviar.disabled = true;
+      botonEnviar.textContent = 'Guardando...';
+
+      const datos = {
+        tipo: tipo,
+        nombre: valorDe('nombre'),
+        apellido: valorDe('apellido'),
+        dni: valorDe('dni').replace(/\D/g, ''),
+        institucion: valorDe('institucion'),
+        localidad: valorDe('localidad'),
+        cargo: valorDe('cargo'),
+        correo: valorDe('correo'),
+        telefono: valorDe('telefono'),
+        stand: valorDe('stand')
+      };
+
+      try {
+        // Google Apps Script no acepta el envio normal desde otra pagina,
+        // asi que se manda como texto plano y el script lo interpreta igual
+        const respuesta = await fetch(DONDE_GUARDAR, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(datos)
+        });
+
+        const resultado = await respuesta.json();
+
+        if (!resultado.ok) throw new Error(resultado.mensaje || 'No se pudo guardar');
+
+        document.getElementById('codigoAsignado').textContent = resultado.codigo;
+
+        if (resultado.repetido) {
+          document.getElementById('tituloResultado').textContent = 'Ya estabas inscripto';
+          document.getElementById('textoResultado').textContent =
+            'Este es el código que te habíamos asignado. Presentalo en la entrada.';
+        }
+
+        document.body.classList.add('listo');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      } catch (error) {
+        falla.textContent = 'No se pudo guardar la inscripción. Fijate si tenés internet y probá de nuevo.';
+        falla.classList.add('visible');
+      }
+
+      botonEnviar.disabled = false;
+      botonEnviar.textContent = 'Confirmar inscripción';
+    });
+
+    // ----- Inscribir a otra persona -----
+    document.getElementById('otraVez').addEventListener('click', () => {
+      ['nombre','apellido','dni','institucion','localidad','cargo','correo','telefono','stand']
+        .forEach(id => {
+          document.getElementById(id).value = '';
+          marcarError(id, false);
+        });
+      document.body.classList.remove('listo');
+      document.getElementById('nombre').focus();
+    });
+
+    // Enter pasa al campo siguiente, como en cualquier formulario
+    document.querySelectorAll('input').forEach((campo, i, todos) => {
+      campo.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        const siguiente = todos[i + 1];
+        if (siguiente && siguiente.offsetParent !== null) siguiente.focus();
+        else botonEnviar.click();
+      });
+    });
+  </script>
+
+</body>
+</html>
